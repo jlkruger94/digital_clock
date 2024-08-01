@@ -10,7 +10,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "main.h"
+#include "stm32f4xx_nucleo_144.h"
+
 typedef uint32_t tick_t;
 typedef bool bool_t;
 

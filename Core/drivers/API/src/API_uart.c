@@ -42,7 +42,7 @@ bool_t uartInit(void)
         - BaudRate = 9600 baud
         - Hardware flow control disabled (RTS and CTS signals)
     */
-    UartHandle.Instance        = USARTx;
+    UartHandle.Instance        = USART3;
 
     UartHandle.Init.BaudRate   = BAUD_RATE;
     UartHandle.Init.WordLength = UART_WORDLENGTH_8B;

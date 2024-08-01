@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "main.h"
+#include "stm32f4xx_nucleo_144.h"
 
 /* Exported types ------------------------------------------------------------*/
 typedef bool bool_t;
