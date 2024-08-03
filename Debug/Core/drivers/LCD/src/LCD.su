@@ -1,0 +1,11 @@
+../Core/drivers/LCD/src/LCD.c:18:6:LCD_print_string	24	static
+../Core/drivers/LCD/src/LCD.c:29:6:LCD_print_char	16	static
+../Core/drivers/LCD/src/LCD.c:37:6:LCD_clear	8	static
+../Core/drivers/LCD/src/LCD.c:44:6:LCD_set_cursor	16	static
+../Core/drivers/LCD/src/LCD.c:49:6:LCD_show_cursor	16	static
+../Core/drivers/LCD/src/LCD.c:55:6:LCD_show_cursos_blink	8	static
+../Core/drivers/LCD/src/LCD.c:60:9:LCD_set_position_xy	16	static
+../Core/drivers/LCD/src/LCD.c:75:9:LCD_shift_cursor	16	static
+../Core/drivers/LCD/src/LCD.c:109:6:LCD_init	8	static
+../Core/drivers/LCD/src/LCD.c:131:13:LCD_delay	16	static
+../Core/drivers/LCD/src/LCD.c:145:13:LCD_error_handler	4	static

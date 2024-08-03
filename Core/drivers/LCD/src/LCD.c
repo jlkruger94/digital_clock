@@ -15,45 +15,102 @@ static bool_t LCD_was_initialized = false;
 static void LCD_delay(uint16_t);
 static void LCD_error_handler(void);
 
-void lcd_print_string(const uint8_t *str)
+void LCD_print_string(const uint8_t *str)
 {
     if(!LCD_was_initialized || str == NULL) LCD_error_handler();
     
     uint32_t index = 0;
     while(str[index] != '\0'){
-        lcd_print_char(str[index]);
+        LCD_print_char(str[index]);
         index ++;
     }
 }
 
-void lcd_print_char(const uint8_t charact)
+void LCD_print_char(const uint8_t charact)
 {
     if(!LCD_was_initialized) LCD_error_handler();
-
     LCD_PCF8574_hw_lcd_send_data(charact);
-    
 }
 
-void lcd_clear(void)
+void LCD_clear(void)
 {
   if(!LCD_was_initialized) LCD_error_handler();
-
   LCD_PCF8574_hw_send_command(LCD_DISP_CLEAR);
 }
 
-void lcd_set_cursor(uint8_t row, uint8_t col)
+void LCD_show_cursor(bool_t show_cursor){
+
+    if(!LCD_was_initialized) LCD_error_handler();
+    if(show_cursor == true)
+        LCD_PCF8574_hw_send_command(LCD_CURSOR_ON);
+    else  LCD_PCF8574_hw_send_command(LCD_CURSOR_BLINK);
+}
+
+void LCD_show_cursos_blink(void)
 {
     if(!LCD_was_initialized) LCD_error_handler();
+    LCD_PCF8574_hw_send_command(LCD_CURSOR_BLINK);
 }
+
+uint8_t LCD_set_position_xy (uint8_t x, uint8_t y)
+{
+    if (x > LCD_COLS || y > LCD_ROWS)
+    {
+      return 1;
+    }
+    if (y == 0)
+    {
+      LCD_PCF8574_hw_send_command(LCD_POSITION | (LCD_ROW1_START + x));
+    } else if (y == 1)
+    {
+      LCD_PCF8574_hw_send_command(LCD_POSITION | (LCD_ROW2_START + x));
+    }
+    return 0;
+}
+
+uint8_t LCD_shift_cursor (uint8_t item, uint8_t direction)
+{
+    if(!LCD_was_initialized) LCD_error_handler();
+
+    if ((item != 'D') && (item != 'C'))
+    {
+      return 1;
+    }
+    if ((direction != 'R') && (direction != 'L'))
+    {
+
+      return 1;
+    }
+    if (item == 'C')
+    {
+      if (direction == LCD_RIGHT)
+      {
+        LCD_PCF8574_hw_send_command(LCD_SHIFT | LCD_CURSOR | LCD_RIGHT);
+      } else {
+        LCD_PCF8574_hw_send_command(LCD_SHIFT | LCD_CURSOR | LCD_LEFT);
+      }
+    } else
+    {
+      if (direction == 'R')
+      {
+        LCD_PCF8574_hw_send_command(LCD_SHIFT | LCD_DISPLAY | LCD_RIGHT);
+      } else
+      {
+        LCD_PCF8574_hw_send_command(LCD_SHIFT | LCD_DISPLAY | LCD_LEFT);
+      }
+    }
+    return 0;
+}
+
 void LCD_init(void)
 {
     if(LCD_was_initialized) return;
 
-    HAL_Delay(20);
+    LCD_delay(20);
     LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
-    HAL_Delay(10);
+    LCD_delay(10);
     LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
-    HAL_Delay(1);
+    LCD_delay(1);
     LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
     LCD_PCF8574_hw_send_nibble(LCD_4BIT_MODE); // 4-bit mode
 
@@ -63,7 +120,7 @@ void LCD_init(void)
     LCD_PCF8574_hw_send_command(LCD_ENTRY_MODE); // Entry mode set: Increment cursor
     LCD_PCF8574_hw_send_command(LCD_DISP_ON); // Display on, cursor off
     LCD_PCF8574_hw_send_command(LCD_DISP_CLEAR);// Display clear
-    HAL_Delay(2);
+    LCD_delay(2);
     LCD_was_initialized = true;
 }
 

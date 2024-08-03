@@ -115,7 +115,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+	  uint8_t buffer [] = "Hola";
+	  LCD_print_string(buffer);
+	  LCD_show_cursos_blink();
+	  LCD_shift_cursor('D', 'L');
+	  LCD_set_position_xy (5, 1);
+	  LCD_clear();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
