@@ -1,8 +1,0 @@
-../Core/drivers/API/src/API_uart.c:35:8:uartInit	2
-../Core/drivers/API/src/API_uart.c:85:6:uartSendString	3
-../Core/drivers/API/src/API_uart.c:101:6:uartSendStringSize	3
-../Core/drivers/API/src/API_uart.c:115:6:uartReceiveStringSize	7
-../Core/drivers/API/src/API_uart.c:143:13:UartErrorHandler	1
-../Core/drivers/API/src/API_uart.c:153:1:__io_putchar	1
-../Core/drivers/API/src/API_uart.c:165:13:GetParityString	6
-../Core/drivers/API/src/API_uart.c:193:13:GetModeString	6

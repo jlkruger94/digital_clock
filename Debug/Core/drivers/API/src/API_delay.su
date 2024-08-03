@@ -1,5 +1,0 @@
-../Core/drivers/API/src/API_delay.c:23:6:DelayInit	16	static
-../Core/drivers/API/src/API_delay.c:44:8:DelayRead	16	static
-../Core/drivers/API/src/API_delay.c:74:6:DelayWrite	16	static
-../Core/drivers/API/src/API_delay.c:92:8:DelayIsRunning	16	static
-../Core/drivers/API/src/API_delay.c:107:13:DelayErrorHandler	8	static,ignoring_inline_asm
