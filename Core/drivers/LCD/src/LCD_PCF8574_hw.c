@@ -15,7 +15,6 @@ static void LCD_PCF8574_hw_delay(uint16_t);
 static void LCD_PCF8574_hw_I2C_transmit(uint8_t data);
 static void LCD_PCF8574_hw_E_pulse (uint8_t data);
 static void LCD_PCF8574_hw_send_byte(uint8_t data, uint8_t annex);
-static void LCD_PCF8574_hw_send_nibble (uint8_t data);
 
 void LCD_PCF8574_hw_send_command(uint8_t cmd)
 {
@@ -24,7 +23,7 @@ void LCD_PCF8574_hw_send_command(uint8_t cmd)
 
 void LCD_PCF8574_hw_lcd_send_data(uint8_t data)
 {
-    LCD_PCF8574_hw_send_byte(data, LCD_PCF8574_RS | LCD_PCF8574_P3);
+    LCD_PCF8574_hw_send_byte(data, LCD_PCF8574_RS);
 }
 
 static void LCD_PCF8574_hw_send_byte(uint8_t data, uint8_t annex)
@@ -39,12 +38,12 @@ static void LCD_PCF8574_hw_send_byte(uint8_t data, uint8_t annex)
 
 }
 
-static void LCD_PCF8574_hw_send_nibble (uint8_t data)
+void LCD_PCF8574_hw_send_nibble (uint8_t data)
 {
-
-  LCD_PCF8574_hw_I2C_transmit(data);
-  
-  LCD_PCF8574_hw_E_pulse(data);
+    LCD_PCF8574_hw_I2C_transmit(data | LCD_PCF8574_E | LCD_PCF8574_P3);
+    LCD_PCF8574_hw_delay(1);
+    LCD_PCF8574_hw_I2C_transmit(data | LCD_PCF8574_P3);
+    LCD_PCF8574_hw_delay(1);
 }
 
 static void LCD_PCF8574_hw_delay(uint16_t delay)
@@ -68,7 +67,7 @@ static void LCD_PCF8574_hw_E_pulse (uint8_t data)
   
   LCD_PCF8574_hw_delay(1);
   
-  LCD_PCF8574_hw_I2C_transmit(data & ~LCD_PCF8574_E);
+  LCD_PCF8574_hw_I2C_transmit(data);
   
   LCD_PCF8574_hw_delay(1);
 }

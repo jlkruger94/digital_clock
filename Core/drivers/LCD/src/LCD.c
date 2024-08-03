@@ -49,23 +49,21 @@ void LCD_init(void)
 {
     if(LCD_was_initialized) return;
 
-    LCD_delay(16);
-    LCD_PCF8574_hw_send_command(LCD_INIT_SEQ); // Wake up
-    LCD_delay(5);
-    LCD_PCF8574_hw_send_command(LCD_INIT_SEQ); // Wake up
-    LCD_delay(1);
-    LCD_PCF8574_hw_send_command(LCD_INIT_SEQ); // Wake up
-    LCD_delay(10);
-    LCD_PCF8574_hw_send_command(LCD_4BIT_MODE); // 4-bit mode
-    LCD_delay(10);
+    HAL_Delay(20);
+    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
+    HAL_Delay(10);
+    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
+    HAL_Delay(1);
+    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
+    LCD_PCF8574_hw_send_nibble(LCD_4BIT_MODE); // 4-bit mode
 
     LCD_PCF8574_hw_send_command(LCD_4BIT_MODE | LCD_2_ROWS | LCD_FONT_5x8); // Function set: 4-bit mode, 2 lines, 5x8 dots
     LCD_PCF8574_hw_send_command(LCD_DISP_OFF); // Display off
-    LCD_PCF8574_hw_send_command(LCD_DISP_CLEAR); // Clear display
-    LCD_delay(2);
+    LCD_PCF8574_hw_send_command(LCD_RETURN_HOME);
     LCD_PCF8574_hw_send_command(LCD_ENTRY_MODE); // Entry mode set: Increment cursor
     LCD_PCF8574_hw_send_command(LCD_DISP_ON); // Display on, cursor off
-
+    LCD_PCF8574_hw_send_command(LCD_DISP_CLEAR);// Display clear
+    HAL_Delay(2);
     LCD_was_initialized = true;
 }
 

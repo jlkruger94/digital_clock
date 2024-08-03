@@ -48,6 +48,6 @@
 
 void LCD_PCF8574_hw_send_command(uint8_t cmd);
 void LCD_PCF8574_hw_lcd_send_data(uint8_t data);
-
+void LCD_PCF8574_hw_send_nibble (uint8_t data);
 
 #endif /* DRIVERS_LCD_INC_LCD_PCF8574_HW_H_ */

@@ -115,8 +115,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    uint8_t buffer[] = "Prueba";
-    lcd_print_string(buffer);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
