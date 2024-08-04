@@ -108,19 +108,19 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  LCD_init();
+  LCD_init(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //uint8_t buffer [] = "Hola Ana";
-	  //LCD_print_string(buffer);
-	  //LCD_show_cursos_blink();
-	  //LCD_shift_cursor('D', 'L');
-	  //LCD_set_position_xy (5, 1);
-	  //LCD_clear();
+	  uint8_t buffer [] = "Hola Ana";
+	  LCD_print_string(buffer);
+	  LCD_show_cursos_blink();
+	  LCD_shift_cursor('C', 'L');
+	  LCD_set_position_xy (5, 1);
+	  LCD_clear();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

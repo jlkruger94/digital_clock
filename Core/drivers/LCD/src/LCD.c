@@ -102,25 +102,32 @@ uint8_t LCD_shift_cursor (uint8_t item, uint8_t direction)
     return 0;
 }
 
-void LCD_init(void)
+void LCD_init(void *i2c_handler)
 {
     if(LCD_was_initialized) return;
-
-    LCD_delay(20);
-    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
-    LCD_delay(10);
-    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
-    LCD_delay(1);
-    LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
+    LCD_PCF8574_hw_set_i2c_handler(i2c_handler);
+    // Times sequence
+    uint8_t time_seq []= {20 , 10, 1, 2};
+    
+    // Parameters sequence
+    uint8_t params_seq [] = {
+      LCD_4BIT_MODE | LCD_2_ROWS | LCD_FONT_5x8, // Function set: 4-bit mode, 2 lines, 5x8 dots
+      LCD_DISP_OFF, // Display off
+      LCD_RETURN_HOME,
+      LCD_ENTRY_MODE,// Entry mode set: Increment cursor
+      LCD_DISP_ON, // Display on, cursor off
+      LCD_DISP_CLEAR // Display clear
+    };
+    uint8_t i = 0;
+    for (i = 0; i < sizeof(time_seq) - 1; i++)
+    {
+      LCD_delay(time_seq[i]);
+      LCD_PCF8574_hw_send_nibble(LCD_INIT_SEQ); // Wake up
+    }
     LCD_PCF8574_hw_send_nibble(LCD_4BIT_MODE); // 4-bit mode
-
-    LCD_PCF8574_hw_send_command(LCD_4BIT_MODE | LCD_2_ROWS | LCD_FONT_5x8); // Function set: 4-bit mode, 2 lines, 5x8 dots
-    LCD_PCF8574_hw_send_command(LCD_DISP_OFF); // Display off
-    LCD_PCF8574_hw_send_command(LCD_RETURN_HOME);
-    LCD_PCF8574_hw_send_command(LCD_ENTRY_MODE); // Entry mode set: Increment cursor
-    LCD_PCF8574_hw_send_command(LCD_DISP_ON); // Display on, cursor off
-    LCD_PCF8574_hw_send_command(LCD_DISP_CLEAR);// Display clear
-    LCD_delay(2);
+    
+    for (uint8_t j = 0; j < sizeof(params_seq); j++) LCD_PCF8574_hw_send_command(params_seq[j]);
+    LCD_delay(time_seq[i]);
     LCD_was_initialized = true;
 }
 
