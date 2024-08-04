@@ -13,7 +13,6 @@ static const uint32_t MAX_TRANSMITION_TOUT = 15000;
 
 static void LCD_PCF8574_hw_delay(uint16_t);
 static void LCD_PCF8574_hw_I2C_transmit(uint8_t data);
-static void LCD_PCF8574_hw_E_pulse (uint8_t data);
 static void LCD_PCF8574_hw_send_byte(uint8_t data, uint8_t annex);
 
 void LCD_PCF8574_hw_send_command(uint8_t cmd)
@@ -58,18 +57,6 @@ static void LCD_PCF8574_hw_delay(uint16_t delay)
 
     DelayWrite(&delay_struc, delay);
     while(!DelayRead(&delay_struc));
-}
-
-static void LCD_PCF8574_hw_E_pulse (uint8_t data)
-{
-  
-  LCD_PCF8574_hw_I2C_transmit(data | LCD_PCF8574_E);
-  
-  LCD_PCF8574_hw_delay(1);
-  
-  LCD_PCF8574_hw_I2C_transmit(data);
-  
-  LCD_PCF8574_hw_delay(1);
 }
 
 static void LCD_PCF8574_hw_I2C_transmit(uint8_t data)
