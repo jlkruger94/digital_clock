@@ -36,7 +36,11 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef enum {
+  READY_FOR_SAVE,
+  ADJUSTING,
+  TIMEOUT_REACHED
+} time_adjust_t;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -109,7 +113,7 @@ void Error_Handler(void);
 #define LD2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define BUFFER_S 256
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

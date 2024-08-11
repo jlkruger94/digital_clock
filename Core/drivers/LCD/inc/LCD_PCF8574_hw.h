@@ -49,9 +49,42 @@ typedef bool bool_t;
 #define LCD_ROW2_START              0x40
 #define LCD_ROW2_END                LCD_COLS
 
+/**
+ * @brief Sends a command to the LCD.
+ * 
+ * @param cmd The command byte to be sent.
+ * 
+ * @retval None
+ */
 void LCD_PCF8574_hw_send_command(uint8_t cmd);
+
+/**
+ * @brief Sends data to the LCD.
+ * 
+ * @param data The data byte to be sent.
+ * 
+ * @retval None
+ */
 void LCD_PCF8574_hw_lcd_send_data(uint8_t data);
+
+/**
+ * @brief Sends a nibble to the LCD.
+ * 
+ * @param data The nibble to be sent.
+ * 
+ * @retval None
+ */
 void LCD_PCF8574_hw_send_nibble (uint8_t data);
+
+/**
+ * @brief Sets the I2C handler for communication with the LCD.
+ * 
+ * @param handler Pointer to the I2C handler.
+ *        Must not be NULL.
+ * 
+ * @return true if the I2C handler was set successfully.
+ * @return false if the handler is NULL.
+ */
 bool_t LCD_PCF8574_hw_set_i2c_handler(void *handler);
 
 #endif /* DRIVERS_LCD_INC_LCD_PCF8574_HW_H_ */

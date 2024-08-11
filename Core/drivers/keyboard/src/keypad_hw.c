@@ -9,6 +9,16 @@
 
 static keyboard_hw_t keyboard_hw;
 
+/**
+ * @brief Initializes the hardware for the keypad.
+ * 
+ * This function configures the GPIO pins for the rows as outputs and the columns as inputs,
+ * based on the provided hardware configuration. Currently, GPIO initialization code is commented out.
+ * 
+ * @param hw Hardware configuration structure containing GPIO settings for rows and columns.
+ * 
+ * @retval None
+ */
 void keypad_init_hw(keyboard_hw_t hw)
 {
     keyboard_hw = hw;
@@ -49,6 +59,14 @@ void keypad_init_hw(keyboard_hw_t hw)
     HAL_GPIO_Init(hw.C4.GPIOx, &gpio_init_struct);*/
 }
 
+/**
+ * @brief Scans the keypad and returns the pressed key.
+ * 
+ * This function iterates through each row and column to detect which key is pressed.
+ * It enables one row at a time and reads the column pins to find the pressed key.
+ * 
+ * @return The character corresponding to the pressed key, or '\0' if no key is pressed.
+ */
 uint8_t keypad_hw_scan(void)
 {
     uint8_t keypad_map[ROWS][COLS] = {

@@ -1,0 +1,3 @@
+../Core/drivers/keyboard/src/keyboard.c:23:6:keypad_init	1
+../Core/drivers/keyboard/src/keyboard.c:32:6:keypad_update	11
+../Core/drivers/keyboard/src/keyboard.c:91:9:keypad_get_key	2

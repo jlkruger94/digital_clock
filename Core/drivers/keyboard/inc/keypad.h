@@ -25,8 +25,34 @@ typedef struct {
     bool key_pressed_flag;
 } keypad_t;
 
+/**
+ * @brief Initializes the keypad hardware and related settings.
+ * 
+ * This function initializes the keypad hardware and sets up the debounce delay.
+ * 
+ * @param keypad_hw Hardware configuration for the keypad.
+ * 
+ * @retval None
+ */
 void keypad_init(keyboard_hw_t keypad_hw);
+
+/**
+ * @brief Updates the keypad state based on button presses and releases.
+ * 
+ * This function manages the state machine for button debouncing and detection.
+ * It transitions between states to correctly identify key presses and releases.
+ * 
+ * @retval None
+ */
 void keypad_update(void);
+
+/**
+ * @brief Retrieves the last pressed key.
+ * 
+ * This function returns the last key that was pressed and clears the record of the last pressed key.
+ * 
+ * @return The character of the last pressed key, or '\0' if no key was pressed.
+ */
 uint8_t keypad_get_key(void);
 
 #endif /* DRIVERS_KEYBOARD_INC_KEYBOARD_H_ */

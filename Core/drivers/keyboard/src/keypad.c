@@ -7,7 +7,8 @@
 
 #include "keypad.h"
 
-#define DEBOUNCE_TIME 50 // Tiempo de anti-rebote en ms
+// Debounce time in milliseconds
+#define DEBOUNCE_TIME 50
 
 static keypad_t keypad = {
     .state              = BUTTON_UP,
@@ -20,21 +21,38 @@ static uint8_t last_pressed = '\0';
 static delay_t debounce_delay;
 static uint8_t last_key;
 
+
+/**
+ * @brief Initializes the keypad hardware and related settings.
+ * 
+ * This function initializes the keypad hardware and sets up the debounce delay.
+ * 
+ * @param keypad_hw Hardware configuration for the keypad.
+ * 
+ * @retval None
+ */
 void keypad_init(keyboard_hw_t keypad_hw)
 {
     keypad.state = BUTTON_UP;
     DelayInit(&debounce_delay, DEBOUNCE_TIME);
     last_key = '\0';
-    BSP_LED_Init(LED1);
     keypad_init_hw(keypad_hw);
 }
 
+/**
+ * @brief Updates the keypad state based on button presses and releases.
+ * 
+ * This function manages the state machine for button debouncing and detection.
+ * It transitions between states to correctly identify key presses and releases.
+ * 
+ * @retval None
+ */
 void keypad_update(void)
 {
     switch (keypad.state)
     {
         case BUTTON_UP:
-            // Iniciar el escaneo del teclado
+            // Start scanning the keypad
             keypad.key = keypad_hw_scan();
             if (keypad.key != '\0')
             {
@@ -45,7 +63,7 @@ void keypad_update(void)
         case BUTTON_FALLING:
             if (DelayRead(&debounce_delay))
             {
-                // Verificar si la tecla sigue presionada
+                // Check if the key is still pressed
                 if (keypad_hw_scan() == keypad.key)
                 {
                     keypad.state = BUTTON_DOWN;
@@ -69,7 +87,7 @@ void keypad_update(void)
         case BUTTON_RAISING:
             if (DelayRead(&debounce_delay))
             {
-                // Verificar si la tecla ha sido soltada
+                // Check if the key has been released
                 if (keypad_hw_scan() != keypad.key)
                 {
                     keypad.state = BUTTON_UP;
@@ -87,6 +105,13 @@ void keypad_update(void)
     }
 }
 
+/**
+ * @brief Retrieves the last pressed key.
+ * 
+ * This function returns the last key that was pressed and clears the record of the last pressed key.
+ * 
+ * @return The character of the last pressed key, or '\0' if no key was pressed.
+ */
 uint8_t keypad_get_key(void)
 {
 	uint8_t temp = last_pressed;

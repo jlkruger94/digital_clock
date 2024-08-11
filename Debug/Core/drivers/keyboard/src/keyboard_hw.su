@@ -1,0 +1,2 @@
+../Core/drivers/keyboard/src/keyboard_hw.c:12:6:keypad_init_hw	40	static
+../Core/drivers/keyboard/src/keyboard_hw.c:52:9:keypad_hw_scan	104	static

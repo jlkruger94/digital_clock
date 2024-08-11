@@ -23,6 +23,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "LCD.h"
+#include "RTC.h"
+#include "keypad.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,7 +35,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define TIME_DIGITS_LENGTH 6
+#define DATE_DIGITS_LENGTH 6
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,7 +59,7 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
-
+static const tick_t ADJUST_TIMEOUT = 60000; // wait a minute
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,7 +70,11 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
-
+static time_adjust_t get_time_from_keypad(datetime_data_t *);
+static void display_datetime(datetime_data_t*);
+static bool_t display_config_datetime(datetime_data_t *datetime, uint8_t key);
+static void move_cursor_backward(uint8_t *cursor_x, uint8_t *cursor_y, size_t max_positions);
+static void move_cursor_forward(uint8_t *cursor_x, uint8_t *cursor_y, size_t max_positions);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -108,19 +116,77 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
+  keyboard_hw_t keyboard_hw = {
+    {GPIOF, GPIO_PIN_13}, // L1
+    {GPIOE, GPIO_PIN_9},  // L2
+    {GPIOE, GPIO_PIN_11}, // L3
+    {GPIOF, GPIO_PIN_14}, // L4
+    {GPIOE, GPIO_PIN_13}, // C1
+    {GPIOF, GPIO_PIN_15}, // C2
+    {GPIOG, GPIO_PIN_14}, // C3
+    {GPIOG, GPIO_PIN_9}   // C4
+  };
+
+  keypad_init(keyboard_hw);
   LCD_init(&hi2c1);
+  RTC_init(&hi2c1);
+  // FSM Initialization
+  enum state_t { READ_TIME, DISPLAY_TIME, WAIT_FOR_INPUT, ADJUST_TIME, SAVE_TIME } state = READ_TIME;
+  uint8_t key_pressed = '\0';
+  datetime_data_t current_datetime = { 0 };
+  time_adjust_t adjust_state = TIMEOUT_REACHED;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  uint8_t buffer [] = "Hola Ana";
-	  LCD_print_string(buffer);
-	  LCD_show_cursos_blink();
-	  LCD_shift_cursor('C', 'L');
-	  LCD_set_position_xy (5, 1);
-	  LCD_clear();
+	  keypad_update();
+	  /*uint8_t character = keypad_get_key();
+    //datetime_data_t timestamp = { 0 };
+    //RTC_read(&timestamp);
+	  uint8_t buffer [100] = {0};
+	  sprintf((char*)buffer,"Tecla pulsada: %c",(char)character);
+    if (character != '\0'){
+      LCD_clear();
+      LCD_print_string(buffer);
+    }*/
+	  //LCD_show_cursos_blink();
+	  //LCD_shift_cursor('C', 'L');
+	  //LCD_set_position_xy (5, 1);
+    switch (state) {
+      case READ_TIME:
+         RTC_read(&current_datetime);
+         state = DISPLAY_TIME;
+         break;
+      case DISPLAY_TIME:
+          display_datetime(&current_datetime);
+          state = WAIT_FOR_INPUT;
+          break;
+      case WAIT_FOR_INPUT:
+          key_pressed = keypad_get_key();
+          state = key_pressed == 'A' ? ADJUST_TIME : READ_TIME;
+          break;
+      case ADJUST_TIME:
+          // trae la hora desde el teclado- mestra la pantalla de ajuste
+          adjust_state = get_time_from_keypad(&current_datetime);
+          if (adjust_state == READY_FOR_SAVE)
+            state = SAVE_TIME;
+          else if (adjust_state == ADJUSTING)
+            state = ADJUST_TIME;
+          else 
+            state = READ_TIME;
+          break;
+      case SAVE_TIME:
+          RTC_set(&current_datetime);
+          state = READ_TIME;
+          break;
+      default:
+          state = READ_TIME;
+          break;
+    }
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -354,11 +420,19 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LD1_Pin|LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_13|GPIO_PIN_14, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_9|GPIO_PIN_11, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin, GPIO_PIN_RESET);
@@ -376,6 +450,32 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PF13 PF14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PF15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PE9 PE11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PE13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
   /*Configure GPIO pin : USB_PowerSwitchOn_Pin */
   GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -389,12 +489,236 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PG9 PG14 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_14;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
 
+/**
+ * @brief Displays current time and date on the LCD.
+ * 
+ * Shows the time on the first line and the date with the day of the week on the second line.
+ * 
+ * @param datetime Pointer to datetime_data_t containing the current time and date.
+ * @retval none
+ */
+static void display_datetime(datetime_data_t *datetime)
+{
+  if(datetime == NULL) Error_Handler();
+
+	uint8_t week [][7] = {
+			"Dom",
+			"Lun",
+			"Mar",
+			"Mie",
+			"Jue",
+			"Vie",
+			"Sab"
+	};
+    uint8_t buffer[20];
+
+    LCD_set_position_xy(0, 0);
+    sprintf((char*)buffer, "%02d:%02d:%02d", datetime->time.hours, datetime->time.minutes, datetime->time.seconds);
+    LCD_print_string(buffer);
+
+    LCD_set_position_xy(0, 1);
+    sprintf((char*)buffer, "%s %02d/%02d/%02d", week[datetime->date.day - 1], datetime->date.date, datetime->date.month, datetime->date.year);
+    LCD_print_string(buffer);
+}
+
+
+/**
+ * @brief Moves the cursor forward on the display.
+ * 
+ * Adjusts cursor_x and cursor_y to move forward, wrapping to the next row if needed.
+ * 
+ * @param cursor_x Pointer to horizontal cursor position.
+ * @param cursor_y Pointer to vertical cursor position.
+ * @param max_positions Maximum number of positions for cursor_x.
+ * @retval none
+ */
+static void move_cursor_forward(uint8_t *cursor_x, uint8_t *cursor_y, size_t max_positions)
+{
+  if(cursor_x == NULL || cursor_y == NULL || max_positions <= 0) Error_Handler();
+
+    if ((*cursor_x + 1) >= max_positions) {
+        *cursor_y = (*cursor_y + 1) % 2;
+    }
+    *cursor_x = (*cursor_x + 1) % max_positions;
+}
+
+/**
+ * @brief Moves the cursor backward on the display.
+ * 
+ * Adjusts cursor_x and cursor_y to move backward, wrapping to the previous row if needed.
+ * 
+ * @param cursor_x Pointer to horizontal cursor position.
+ * @param cursor_y Pointer to vertical cursor position.
+ * @param max_positions Maximum number of positions for cursor_x.
+ * @retval none
+ */
+static void move_cursor_backward(uint8_t *cursor_x, uint8_t *cursor_y, size_t max_positions)
+{
+  if(cursor_x == NULL || cursor_y == NULL || max_positions <= 0) Error_Handler();
+
+    *cursor_x = (*cursor_x == 0) ? (max_positions - 1) : (*cursor_x - 1);
+    if (*cursor_x == (max_positions - 1) && *cursor_y == 0) {
+        *cursor_y = 1;
+    } else if (*cursor_x == (max_positions - 1) && *cursor_y == 1) {
+        *cursor_y = 0;
+    }
+}
+
+
+/**
+ * @brief Handles time and date adjustment on the LCD.
+ * 
+ * Allows navigation and digit entry using keypad inputs, updating the datetime structure.
+ * 
+ * @param datetime Pointer to datetime_data_t to be configured.
+ * @param key Keypad input for navigation and digit entry.
+ * @retval true if adjustment is complete, false otherwise.
+ */
+static bool_t display_config_datetime(datetime_data_t *datetime, uint8_t key)
+{
+  if(datetime == NULL || key <= '#' || key >= 'D') Error_Handler();
+
+    uint8_t buffer[BUFFER_S] = {0};
+    // Screen positions for digit entry
+    static uint8_t cursor_positions[] = {6, 7, 9, 10, 12, 13};
+    // Temporary array for time: HHMMSS
+    static uint8_t time_digits[TIME_DIGITS_LENGTH] = {0};
+    // Temporary array for date: DDMMYY
+    static uint8_t date_digits[DATE_DIGITS_LENGTH] = {0};
+    static uint8_t current_cursor_position_x = 0;
+    static uint8_t current_cursor_position_y = 0;
+    static bool_t adjustment_started = false;
+    bool_t ret = false;
+
+    if (!adjustment_started) {
+        // Initialize the configuration screen
+        LCD_show_cursor_blink();
+
+        LCD_set_position_xy(0, 0);
+        sprintf((char*)buffer, "Conf. %02d:%02d:%02d", datetime->time.hours, datetime->time.minutes, datetime->time.seconds);
+        LCD_print_string(buffer);
+
+        LCD_set_position_xy(0, 1);
+        sprintf((char*)buffer, "      %02d/%02d/%02d", datetime->date.date, datetime->date.month, datetime->date.year);
+        LCD_print_string(buffer);
+
+        // Initialize temporary arrays
+        time_digits[0] = datetime->time.hours / 10;
+        time_digits[1] = datetime->time.hours % 10;
+        time_digits[2] = datetime->time.minutes / 10;
+        time_digits[3] = datetime->time.minutes % 10;
+        time_digits[4] = datetime->time.seconds / 10;
+        time_digits[5] = datetime->time.seconds % 10;
+
+        date_digits[0] = datetime->date.date / 10;
+        date_digits[1] = datetime->date.date % 10;
+        date_digits[2] = datetime->date.month / 10;
+        date_digits[3] = datetime->date.month % 10;
+        date_digits[4] = datetime->date.year / 10;
+        date_digits[5] = datetime->date.year % 10;
+
+        adjustment_started = true;
+    }
+
+    // Set cursor position
+    LCD_set_position_xy(cursor_positions[current_cursor_position_x], current_cursor_position_y);
+
+    // Navigation and digit entry
+    switch (key) {
+        case '*':
+            move_cursor_backward(&current_cursor_position_x, &current_cursor_position_y, sizeof(cursor_positions));
+            break;
+        case '#':
+            move_cursor_forward(&current_cursor_position_x, &current_cursor_position_y, sizeof(cursor_positions));
+            break;
+        case 'A':
+            adjustment_started = false;
+            current_cursor_position_x = 0;
+            current_cursor_position_y = 0;
+            ret = true;
+            break;
+    }
+
+    if (key >= '0' && key <= '9') {
+        uint8_t digit = key - '0';
+        LCD_print_char(key);
+
+        // Fill temporary arrays
+        if (current_cursor_position_y == 0) {
+            time_digits[current_cursor_position_x] = digit;
+        } else {
+            date_digits[current_cursor_position_x] = digit;
+        }
+
+        // Mover el cursor a la siguiente posición
+        move_cursor_forward(&current_cursor_position_x, &current_cursor_position_y, sizeof(cursor_positions));
+    }
+
+    // Update datetime structure if adjustment is complete
+    if (ret) {
+        datetime->time.hours = (time_digits[0] * 10) + time_digits[1];
+        datetime->time.minutes = (time_digits[2] * 10) + time_digits[3];
+        datetime->time.seconds = (time_digits[4] * 10) + time_digits[5];
+
+        datetime->date.date = (date_digits[0] * 10) + date_digits[1];
+        datetime->date.month = (date_digits[2] * 10) + date_digits[3];
+        datetime->date.year = (date_digits[4] * 10) + date_digits[5];
+
+        // Adjust to valid values
+        RTC_validate_datetime(datetime);
+        RTC_calculate_day_of_week(datetime);
+    }
+
+    return ret;
+}
+
+/**
+ * @brief Manages time and date adjustment through the keypad.
+ * 
+ * Handles timeout and determines when the adjustment is ready to be saved.
+ * 
+ * @param data_time_struct Pointer to datetime_data_t to be adjusted.
+ * @retval time_adjust_t Status indicating adjustment progress or timeout.
+ */
+static time_adjust_t get_time_from_keypad(datetime_data_t *data_time_struct)
+{
+  if(data_time_struct == NULL) Error_Handler();
+
+  static delay_t timeout;
+  static bool_t delay_was_initialized = false;
+  time_adjust_t ret = ADJUSTING;
+  uint8_t key = keypad_get_key();
+
+  if(!delay_was_initialized || key != '\0')
+  {
+    DelayInit(&timeout,ADJUST_TIMEOUT);
+    delay_was_initialized = true;
+  }
+  if(DelayRead(&timeout))
+    ret = TIMEOUT_REACHED;
+  
+  if(display_config_datetime(data_time_struct, key)){
+    ret = READY_FOR_SAVE;
+    delay_was_initialized = false;
+  }
+
+  if(ret != ADJUSTING)
+    LCD_clear();
+
+  return ret;
+}
 /* USER CODE END 4 */
 
 /**
