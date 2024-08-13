@@ -1,5 +1,5 @@
 /*
- * keyboard.h
+ * keypad.h
  *
  *  Created on: Aug 5, 2024
  *      Author: José Luis Krüger

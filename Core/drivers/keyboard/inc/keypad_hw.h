@@ -1,5 +1,5 @@
 /*
- * keyboard_hw.h
+ * keypad_hw.h
  *
  *  Created on: Aug 5, 2024
  *      Author: José Luis Krüger
@@ -38,7 +38,7 @@ typedef struct
  * @brief Initializes the hardware for the keypad.
  * 
  * This function configures the GPIO pins for the rows as outputs and the columns as inputs,
- * based on the provided hardware configuration. Currently, GPIO initialization code is commented out.
+ * based on the provided hardware configuration. Currently, GPIO initialization code is not available.
  * 
  * @param hw Hardware configuration structure containing GPIO settings for rows and columns.
  * 

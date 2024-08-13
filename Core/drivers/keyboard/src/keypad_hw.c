@@ -1,5 +1,5 @@
 /*
- * keyboard_hw.c
+ * keypad_hw.c
  *
  *  Created on: Aug 5, 2024
  *      Author: José Luis Krüger
@@ -26,7 +26,7 @@ void keypad_init_hw(keyboard_hw_t hw)
 #ifndef EXTERNAL_INITIALIZATION
     GPIO_InitTypeDef gpio_init_struct = {0};
 
-    // Inicializar filas como salidas
+    // Initialize rows as outputs
     gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
     gpio_init_struct.Pull = GPIO_NOPULL;
     gpio_init_struct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -43,7 +43,7 @@ void keypad_init_hw(keyboard_hw_t hw)
     gpio_init_struct.Pin = hw.L4.GPIO_Pin;
     HAL_GPIO_Init(hw.L4.GPIOx, &gpio_init_struct);
     HAL_GPIO_WritePin(hw.L4.GPIOx, hw.L4.GPIO_Pin, GPIO_PIN_RESET);
-    // Inicializar columnas como entradas
+    // Initialize columns as inputs
     gpio_init_struct.Mode = GPIO_MODE_IT_RISING;
     gpio_init_struct.Pull = GPIO_NOPULL;
 
