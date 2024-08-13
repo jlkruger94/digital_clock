@@ -142,18 +142,7 @@ int main(void)
   while (1)
   {
 	  keypad_update();
-	  /*uint8_t character = keypad_get_key();
-    //datetime_data_t timestamp = { 0 };
-    //RTC_read(&timestamp);
-	  uint8_t buffer [100] = {0};
-	  sprintf((char*)buffer,"Tecla pulsada: %c",(char)character);
-    if (character != '\0'){
-      LCD_clear();
-      LCD_print_string(buffer);
-    }*/
-	  //LCD_show_cursos_blink();
-	  //LCD_shift_cursor('C', 'L');
-	  //LCD_set_position_xy (5, 1);
+
     switch (state) {
       case READ_TIME:
          RTC_read(&current_datetime);
@@ -522,7 +511,7 @@ static void display_datetime(datetime_data_t *datetime)
 			"Vie",
 			"Sab"
 	};
-    uint8_t buffer[20];
+    uint8_t buffer[BUFFER_S];
 
     LCD_set_position_xy(0, 0);
     sprintf((char*)buffer, "%02d:%02d:%02d", datetime->time.hours, datetime->time.minutes, datetime->time.seconds);
@@ -588,10 +577,10 @@ static void move_cursor_backward(uint8_t *cursor_x, uint8_t *cursor_y, size_t ma
  */
 static bool_t display_config_datetime(datetime_data_t *datetime, uint8_t key)
 {
-  if(datetime == NULL || key <= '#' || key >= 'D') Error_Handler();
+  if(datetime == NULL) Error_Handler();
 
     uint8_t buffer[BUFFER_S] = {0};
-    // Screen positions for digit entry
+    // Screen positions for digit entry  HH/DD MM/MM  SS/AA
     static uint8_t cursor_positions[] = {6, 7, 9, 10, 12, 13};
     // Temporary array for time: HHMMSS
     static uint8_t time_digits[TIME_DIGITS_LENGTH] = {0};
@@ -643,15 +632,18 @@ static bool_t display_config_datetime(datetime_data_t *datetime, uint8_t key)
         case '#':
             move_cursor_forward(&current_cursor_position_x, &current_cursor_position_y, sizeof(cursor_positions));
             break;
+        // If key is equal to '+', it means the configuration menu must be restarted.
+        case '+':
         case 'A':
             adjustment_started = false;
             current_cursor_position_x = 0;
             current_cursor_position_y = 0;
-            ret = true;
+            ret = (key != '+');
             break;
     }
 
     if (key >= '0' && key <= '9') {
+        // ASCII to Number
         uint8_t digit = key - '0';
         LCD_print_char(key);
 
@@ -662,7 +654,6 @@ static bool_t display_config_datetime(datetime_data_t *datetime, uint8_t key)
             date_digits[current_cursor_position_x] = digit;
         }
 
-        // Mover el cursor a la siguiente posición
         move_cursor_forward(&current_cursor_position_x, &current_cursor_position_y, sizeof(cursor_positions));
     }
 
@@ -706,8 +697,10 @@ static time_adjust_t get_time_from_keypad(datetime_data_t *data_time_struct)
     DelayInit(&timeout,ADJUST_TIMEOUT);
     delay_was_initialized = true;
   }
-  if(DelayRead(&timeout))
+  if(DelayRead(&timeout)){
     ret = TIMEOUT_REACHED;
+    key = '+';
+  }
   
   if(display_config_datetime(data_time_struct, key)){
     ret = READY_FOR_SAVE;

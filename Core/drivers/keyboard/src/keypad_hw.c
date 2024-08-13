@@ -13,7 +13,7 @@ static keyboard_hw_t keyboard_hw;
  * @brief Initializes the hardware for the keypad.
  * 
  * This function configures the GPIO pins for the rows as outputs and the columns as inputs,
- * based on the provided hardware configuration. Currently, GPIO initialization code is commented out.
+ * based on the provided hardware configuration. Currently, GPIO initialization code is not available.
  * 
  * @param hw Hardware configuration structure containing GPIO settings for rows and columns.
  * 
@@ -23,7 +23,8 @@ void keypad_init_hw(keyboard_hw_t hw)
 {
     keyboard_hw = hw;
 
-/*    GPIO_InitTypeDef gpio_init_struct = {0};
+#ifndef EXTERNAL_INITIALIZATION
+    GPIO_InitTypeDef gpio_init_struct = {0};
 
     // Inicializar filas como salidas
     gpio_init_struct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -56,7 +57,8 @@ void keypad_init_hw(keyboard_hw_t hw)
     HAL_GPIO_Init(hw.C3.GPIOx, &gpio_init_struct);
 
     gpio_init_struct.Pin = hw.C4.GPIO_Pin;
-    HAL_GPIO_Init(hw.C4.GPIOx, &gpio_init_struct);*/
+    HAL_GPIO_Init(hw.C4.GPIOx, &gpio_init_struct);
+#endif
 }
 
 /**
@@ -81,22 +83,22 @@ uint8_t keypad_hw_scan(void)
     
     for (uint8_t row = 0; row < ROWS; row++)
     {
-        // Habilitar fila actual
+        // Enable the current row
         HAL_GPIO_WritePin(rows[row].GPIOx, rows[row].GPIO_Pin, GPIO_PIN_SET);
 
         for (uint8_t col = 0; col < COLS; col++)
         {
 
-            // Leer el estado del pin de columna actual
+            // Read the state of the current column pin
             if (HAL_GPIO_ReadPin(cols[col].GPIOx, cols[col].GPIO_Pin) == GPIO_PIN_SET)
             {
-                // Deshabilitar fila actual
+                // Disable the current row
                 HAL_GPIO_WritePin(rows[row].GPIOx, rows[row].GPIO_Pin, GPIO_PIN_RESET);
-                // Retornar el carácter correspondiente a la tecla presionada
+                // Return the character corresponding to the pressed key
                 return keypad_map[row][col];
             }
         }
-        // Deshabilitar fila actual
+        // Disable the current row
         HAL_GPIO_WritePin(rows[row].GPIOx, rows[row].GPIO_Pin, GPIO_PIN_RESET);
     }
     return '\0';

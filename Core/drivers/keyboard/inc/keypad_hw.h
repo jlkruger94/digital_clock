@@ -12,6 +12,7 @@
 
 #define ROWS 4
 #define COLS 4
+#define EXTERNAL_INITIALIZATION
 
 typedef struct
 {
