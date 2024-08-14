@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <keypad/inc/keypad.h>
 #include "main.h"
 #include "string.h"
 
@@ -24,7 +25,6 @@
 /* USER CODE BEGIN Includes */
 #include "LCD.h"
 #include "RTC.h"
-#include "keypad.h"
 #include <stdio.h>
 /* USER CODE END Includes */
 

@@ -27,7 +27,7 @@ Core/Startup \
 Core/drivers/API/src \
 Core/drivers/LCD/src \
 Core/drivers/RTC/src \
-Core/drivers/keyboard/src \
+Core/drivers/keypad/src \
 Drivers/BSP/STM32F4xx_Nucleo_144 \
 Drivers/STM32F4xx_HAL_Driver/Src \
 

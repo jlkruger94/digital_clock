@@ -5,7 +5,7 @@
  *      Author: José Luis Krüger
  */
 
-#include "keypad.h"
+#include <keypad/inc/keypad.h>
 
 // Debounce time in milliseconds
 #define DEBOUNCE_TIME 50

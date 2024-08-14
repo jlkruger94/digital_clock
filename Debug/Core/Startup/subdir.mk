@@ -16,7 +16,7 @@ S_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Core/Startup/%.o: ../Core/Startup/%.s Core/Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/LCD" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/LCD/inc" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/API/inc" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Drivers/BSP" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Drivers/BSP/STM32F4xx_Nucleo_144" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/RTC/inc" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/keyboard/inc" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/LCD" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/LCD/inc" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/API/inc" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Drivers/BSP" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Drivers/BSP/STM32F4xx_Nucleo_144" -I"/home/oem/STM32CubeIDE/workspace_1.15.0/digital_clock/Core/drivers/RTC/inc" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
 
 clean: clean-Core-2f-Startup
 

@@ -7,7 +7,7 @@
 
 #ifndef DRIVERS_KEYBOARD_INC_KEYBOARD_H_
 #define DRIVERS_KEYBOARD_INC_KEYBOARD_H_
-#include "keypad_hw.h"
+#include <keypad/inc/keypad_hw.h>
 #include "API_delay.h"
 
 typedef enum {

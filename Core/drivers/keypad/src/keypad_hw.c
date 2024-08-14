@@ -5,7 +5,7 @@
  *      Author: José Luis Krüger
  */
 
-#include "keypad_hw.h"
+#include <keypad/inc/keypad_hw.h>
 
 static keyboard_hw_t keyboard_hw;
 

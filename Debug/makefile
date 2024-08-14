@@ -11,7 +11,7 @@ RM := rm -rf
 -include sources.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
 -include Drivers/BSP/STM32F4xx_Nucleo_144/subdir.mk
--include Core/drivers/keyboard/src/subdir.mk
+-include Core/drivers/keypad/src/subdir.mk
 -include Core/drivers/RTC/src/subdir.mk
 -include Core/drivers/LCD/src/subdir.mk
 -include Core/drivers/API/src/subdir.mk
