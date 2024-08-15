@@ -106,7 +106,8 @@ void LCD_clear(void)
  * 
  * @retval None
  */
-void LCD_show_cursor(bool_t show_cursor){
+void LCD_show_cursor(bool_t show_cursor)
+{
 
     if(!LCD_was_initialized) LCD_error_handler();
     if(show_cursor == true)
