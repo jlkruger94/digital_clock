@@ -20,7 +20,8 @@ static void RTC_DS3231_hw_error_handler(void);
  * @param  reg: Register address to read from.
  * @retval The data read from the register.
  */
-uint8_t RTC_DS3231_hw_read_register(uint8_t reg) {
+uint8_t RTC_DS3231_hw_read_register(uint8_t reg)
+{
     uint8_t data = 0;
     HAL_StatusTypeDef ret;
 
@@ -43,7 +44,8 @@ uint8_t RTC_DS3231_hw_read_register(uint8_t reg) {
  * @param  value: Value to write to the register.
  * @retval None
  */
-void RTC_DS3231_hw_write_register(uint8_t reg, uint8_t value) {
+void RTC_DS3231_hw_write_register(uint8_t reg, uint8_t value)
+{
     HAL_StatusTypeDef ret;
     uint8_t data[2] = {reg, value};
 
@@ -58,7 +60,8 @@ void RTC_DS3231_hw_write_register(uint8_t reg, uint8_t value) {
  * @param  handler: Pointer to the I2C handler.
  * @retval True if the handler was set successfully, false otherwise.
  */
-bool_t RTC_DS3231_hw_set_I2C_handler(void *handler) {
+bool_t RTC_DS3231_hw_set_I2C_handler(void *handler)
+{
     if (handler == NULL) return false;
     i2c_handler = (I2C_HandleTypeDef *)handler;
     return true;
@@ -70,7 +73,8 @@ bool_t RTC_DS3231_hw_set_I2C_handler(void *handler) {
  * @param  size: Number of bytes to transmit.
  * @retval HAL status of the transmission.
  */
-static HAL_StatusTypeDef RTC_DS3231_hw_I2C_transmit(uint8_t *data, uint16_t size) {
+static HAL_StatusTypeDef RTC_DS3231_hw_I2C_transmit(uint8_t *data, uint16_t size)
+{
 
     if (data == NULL || size == 0) RTC_DS3231_hw_error_handler();
 
@@ -91,7 +95,8 @@ static HAL_StatusTypeDef RTC_DS3231_hw_I2C_transmit(uint8_t *data, uint16_t size
  * @param  size: Number of bytes to receive.
  * @retval HAL status of the reception.
  */
-static HAL_StatusTypeDef RTC_DS3231_hw_I2C_receive(uint8_t *data, uint16_t size) {
+static HAL_StatusTypeDef RTC_DS3231_hw_I2C_receive(uint8_t *data, uint16_t size)
+{
 
     if (data == NULL || size == 0) RTC_DS3231_hw_error_handler();
 
@@ -109,7 +114,8 @@ static HAL_StatusTypeDef RTC_DS3231_hw_I2C_receive(uint8_t *data, uint16_t size)
  * @brief  Handles errors.
  * @retval None
  */
-static void RTC_DS3231_hw_error_handler(void) {
+static void RTC_DS3231_hw_error_handler(void)
+{
 
     while(1) {
         __NOP();

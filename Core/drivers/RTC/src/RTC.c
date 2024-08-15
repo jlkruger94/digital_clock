@@ -47,7 +47,8 @@ void RTC_init(void *i2c_handler)
  * @param  datetime: Pointer to the datetime structure to be updated.
  * @retval None
  */
-void RTC_read(datetime_data_t *datetime) {
+void RTC_read(datetime_data_t *datetime)
+{
     if(!RTC_was_initialized) RTC_error_handler();
 
     uint8_t params[PARAMS_ARRAY_LENGTH][PARAMS_ARRAY_TYPES] = {
@@ -79,7 +80,8 @@ void RTC_read(datetime_data_t *datetime) {
  * @param  datetime: Pointer to the datetime structure containing the values to be set.
  * @retval None
  */
-void RTC_set(datetime_data_t *datetime) {
+void RTC_set(datetime_data_t *datetime)
+{
     if(!RTC_was_initialized || datetime == NULL) RTC_error_handler();;
 
     uint8_t params[PARAMS_ARRAY_LENGTH][PARAMS_ARRAY_TYPES] = {
